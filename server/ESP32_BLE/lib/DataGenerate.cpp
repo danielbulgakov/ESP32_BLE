@@ -5,18 +5,20 @@
 class MAX30102{
 public:
     MAX30102(){
+    }
+    void _init_(){
         srand(time(NULL));
     }
     int Pulse(){
-        return (int)(rand() % 150); 
+        return 60 + (rand() % 30); 
     }
     int O2(){
-        return(int)(rand() % 100);
+        return 90 + (rand() % 11);
     }
     float Gyro(){
-        return 0.1 + rand() % 2; 
+        return 0.1 + rand() % 3; 
     }
     float Acc(){
-        return -0.1 - rand() % 2; 
+        return -0.1 - rand() % 3; 
     }
 };

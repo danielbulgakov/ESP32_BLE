@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "../lib/DataGenerate.cpp"
+#include <cstring>
 
 #define DEBUG
 
@@ -44,10 +45,10 @@ class MyServerCallbacks: public BLEServerCallbacks {
   }
 };
 
-
+MAX30102 Sensor;
 void setup() {
   Serial.begin(115200);
-
+  Sensor._init_();
   BLEDevice::init(SERVER_NAME);
 
   // Create the BLE Server
@@ -86,46 +87,45 @@ void setup() {
 
 }
 
-MAX30102 m;
-int pulse, o2;
-float accel, gyro;
+
+char pulse[4] = "NaN";
+char o2[4] = "NaN";
+char gyro[6] = "NaN";
+char accel[6] = "NaN";
+const int packsize = 9;
 
 void loop() {
-    static const int packsize = 9;
     if (deviceConnected) {
     
+      #ifdef DEBUG
+      Serial.print("Пульс        = ");
+      Serial.println(pulse);
+      Serial.print("Кислород     = ");
+      Serial.println(o2);
+      Serial.print("Гироскоп     = ");
+      Serial.println(gyro);
+      Serial.print("Акселерометр = ");
+      Serial.println(accel);
+      #endif //DEBUG
+      
       // generate data
       // Pulse
-      static char pulse[3];
-      dtostrf(((double)m.Pulse()), 3, 0, pulse);
+      strcpy(pulse, std::to_string(Sensor.Pulse()).c_str());
       PulseCharacterisric.setValue(pulse);
       PulseCharacterisric.notify();
       // O2
-      static char o2[3];
-      dtostrf((double)(m.O2()),3,0,o2);
+      strcpy(o2, std::to_string(Sensor.O2()).c_str());
       O2Characterisric.setValue(o2);
       O2Characterisric.notify();
       // Gyro
-      static char gyro[10];
-      dtostrf(m.Gyro(), 10, 2, gyro);
+      dtostrf(Sensor.Gyro(), 6, 2, gyro);
       GyroCharacterisric.setValue(gyro);
       GyroCharacterisric.notify();
       // Accel
-      static char accel[10];
-      dtostrf(m.Acc(), 10, 2, accel);
+      dtostrf(Sensor.Acc(), 6, 2, accel);
       AccelCharacterisric.setValue(accel);
       AccelCharacterisric.notify();
       
-      #ifdef DEBUG
-      Serial.print("Пульс ");
-      Serial.println(pulse);
-      Serial.print("Кислород ");
-      Serial.println(o2);
-      Serial.print("Гироскоп ");
-      Serial.println(gyro);
-      Serial.print("Акселерометр ");
-      Serial.println(accel);
-      #endif //DEBUG
 
 
 
